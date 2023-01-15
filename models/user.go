@@ -12,6 +12,7 @@ type User struct {
 	Role     string `json:"role" gorm:"type:varchar(255)"`
 }
 type UserProfile struct {
+	ID       int    `json:"id"`
 	Fullname string `json:"fullname"`
 	Email    string `json:"email"`
 	Password string `json:"password"`

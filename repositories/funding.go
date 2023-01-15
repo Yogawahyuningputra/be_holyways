@@ -12,6 +12,7 @@ type FundingRepository interface {
 	CreateFunding(funding models.Funding) (models.Funding, error)
 	UpdateFunding(funding models.Funding, ID int) (models.Funding, error)
 	DeleteFunding(funding models.Funding, ID int) (models.Funding, error)
+	GetFundingByUser(ID int) ([]models.Funding, error)
 }
 
 func RepositoryFunding(db *gorm.DB) *repository {
@@ -20,12 +21,17 @@ func RepositoryFunding(db *gorm.DB) *repository {
 
 func (r *repository) FindFundings() ([]models.Funding, error) {
 	var fundings []models.Funding
-	err := r.db.Find(&fundings).Error
+	err := r.db.Preload("User").Find(&fundings).Error
 	return fundings, err
 }
 func (r *repository) GetFunding(ID int) (models.Funding, error) {
 	var funding models.Funding
-	err := r.db.First(&funding, ID).Error
+	err := r.db.Preload("User").First(&funding, ID).Error
+	return funding, err
+}
+func (r *repository) GetFundingByUser(ID int) ([]models.Funding, error) {
+	var funding []models.Funding
+	err := r.db.Preload("User").Where("user_id = ?", ID).Find(&funding).Error
 	return funding, err
 }
 func (r *repository) CreateFunding(funding models.Funding) (models.Funding, error) {

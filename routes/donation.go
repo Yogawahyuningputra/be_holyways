@@ -17,5 +17,9 @@ func DonationRoutes(r *mux.Router) {
 	r.HandleFunc("/donation", middleware.Auth(h.CreateDonation)).Methods("POST")
 	r.HandleFunc("/donation/{id}", middleware.Auth(h.UpdateDonation)).Methods("PATCH")
 	r.HandleFunc("/donation/{id}", middleware.Auth(h.DeleteDonation)).Methods("DELETE")
+	r.HandleFunc("/donationByUser", middleware.Auth(h.GetDonationByUser)).Methods("GET")
+	r.HandleFunc("/donationByFunding/{id}", middleware.Auth(h.GetDonationByFunding)).Methods("GET")
+	r.HandleFunc("/donationPending/{id}", middleware.Auth(h.GetDonationPending)).Methods("GET")
+	r.HandleFunc("/notification", h.Notification).Methods("POST")
 
 }

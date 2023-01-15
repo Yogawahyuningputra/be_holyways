@@ -9,8 +9,8 @@ import (
 func RunMigration() {
 	err := mysql.DB.AutoMigrate(
 		&models.User{},
-		&models.Funding{},
 		&models.Donation{},
+		&models.Funding{},
 	)
 
 	if err != nil {

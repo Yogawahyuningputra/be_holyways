@@ -53,7 +53,25 @@ func (h *handlerFunding) GetFunding(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: funding}
+	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponseFunding(funding)}
+	json.NewEncoder(w).Encode(response)
+
+}
+
+func (h *handlerFunding) GetFundingByUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	userID := int(userInfo["id"].(float64))
+
+	fundings, err := h.FundingRepository.GetFundingByUser(userID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+	}
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: http.StatusOK, Data: fundings}
 	json.NewEncoder(w).Encode(response)
 
 }
@@ -61,20 +79,15 @@ func (h *handlerFunding) CreateFunding(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
-	status := userInfo["role"]
-	if status != "admin" {
-		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: "you're not admin"}
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	userID := int(userInfo["id"].(float64))
 
 	dataContext := r.Context().Value("dataFile")
 	filepath := dataContext.(string)
+	goals, _ := strconv.Atoi(r.FormValue("goals"))
 
 	request := fundingdto.FundingRequest{
 		Title:       r.FormValue("title"),
-		Goals:       r.FormValue("goals"),
+		Goals:       goals,
 		Description: r.FormValue("description"),
 		Image:       r.FormValue("image"),
 	}
@@ -106,6 +119,7 @@ func (h *handlerFunding) CreateFunding(w http.ResponseWriter, r *http.Request) {
 		Goals:       request.Goals,
 		Description: request.Description,
 		Image:       resp.SecureURL,
+		UserID:      userID,
 	}
 	funding, err = h.FundingRepository.CreateFunding(funding)
 	if err != nil {
@@ -123,14 +137,22 @@ func (h *handlerFunding) CreateFunding(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlerFunding) UpdateFunding(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	userID := int(userInfo["id"].(float64))
+
 	dataContext := r.Context().Value("dataFile")
 	filepath := dataContext.(string)
 
+	goals, _ := strconv.Atoi(r.FormValue("goals"))
+
 	request := fundingdto.FundingRequest{
 		Title:       r.FormValue("title"),
-		Goals:       r.FormValue("goals"),
+		Goals:       goals,
 		Description: r.FormValue("description"),
 		Image:       filepath,
+		UserID:      userID,
 	}
 	validation := validator.New()
 	err := validation.Struct(request)
@@ -166,7 +188,7 @@ func (h *handlerFunding) UpdateFunding(w http.ResponseWriter, r *http.Request) {
 	if request.Title != "" {
 		funding.Title = request.Title
 	}
-	if request.Goals != "" {
+	if request.Goals != 0 {
 		funding.Goals = request.Goals
 	}
 	if request.Description != "" {
@@ -175,6 +197,7 @@ func (h *handlerFunding) UpdateFunding(w http.ResponseWriter, r *http.Request) {
 	if request.Image != "" {
 		funding.Image = resp.SecureURL
 	}
+
 	dataFuding, err := h.FundingRepository.UpdateFunding(funding, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -208,4 +231,18 @@ func (h *handlerFunding) DeleteFunding(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: http.StatusOK, Data: dataFunding}
 	json.NewEncoder(w).Encode(response)
+}
+
+func convertResponseFunding(u models.Funding) fundingdto.FundingResponse {
+	return fundingdto.FundingResponse{
+		ID:          u.ID,
+		Title:       u.Title,
+		Goals:       u.Goals,
+		Description: u.Description,
+		Image:       u.Image,
+		UserID:      u.UserID,
+		User:        u.User,
+		CreatedAt:   u.CreatedAt,
+		UpdatedAt:   u.UpdatedAt,
+	}
 }
