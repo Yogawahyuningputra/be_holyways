@@ -53,7 +53,7 @@ func (h *handlerFunding) GetFunding(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 	w.WriteHeader(http.StatusOK)
-	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponseFunding(funding)}
+	response := dto.SuccessResult{Code: http.StatusOK, Data: funding}
 	json.NewEncoder(w).Encode(response)
 
 }
