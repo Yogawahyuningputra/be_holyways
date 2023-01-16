@@ -11,3 +11,13 @@ type FundingRequest struct {
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`
 }
+
+type FundingUpdate struct {
+	Title       string    `json:"title" form:"title"`
+	Goals       int       `json:"goals" form:"goals"`
+	Description string    `json:"description" form:"description"`
+	Image       string    `json:"image" form:"image"`
+	UserID      int       `json:"user_id"`
+	CreatedAt   time.Time `json:"-"`
+	UpdatedAt   time.Time `json:"-"`
+}

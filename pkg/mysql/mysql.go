@@ -17,7 +17,6 @@ func Databaseinit() {
 	var DB_NAME = os.Getenv("DB_NAME")
 	var DB_PORT = os.Getenv("DB_PORT")
 	var err error
-	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	// dsn := "root:@tcp(127.0.0.1:3306)/holyways?charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
 

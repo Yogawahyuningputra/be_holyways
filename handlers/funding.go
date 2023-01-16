@@ -147,7 +147,7 @@ func (h *handlerFunding) UpdateFunding(w http.ResponseWriter, r *http.Request) {
 
 	goals, _ := strconv.Atoi(r.FormValue("goals"))
 
-	request := fundingdto.FundingRequest{
+	request := fundingdto.FundingUpdate{
 		Title:       r.FormValue("title"),
 		Goals:       goals,
 		Description: r.FormValue("description"),
